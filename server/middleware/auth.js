@@ -1,26 +1,48 @@
 const jwt = require('jsonwebtoken');
 
-const auth = async (req, res, next) => {
-  try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
-    if (!token) {
-      throw new Error();
-    }
+const authMiddleware = (req, res, next) => {
+  // Get token from header
+  const token = req.header('Authorization')?.replace('Bearer ', '');
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+  // Check if no token
+  if (!token) {
+    return res.status(401).json({
+      status: 'error',
+      message: 'No token, authorization denied'
+    });
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    req.admin = decoded;
     next();
-  } catch (error) {
-    res.status(401).json({ error: 'Please authenticate.' });
+  } catch (err) {
+    res.status(401).json({
+      status: 'error',
+      message: 'Token is not valid'
+    });
   }
 };
 
-const isAdmin = (req, res, next) => {
-  if (req.user.role !== 'admin' && req.user.role !== 'superadmin') {
-    return res.status(403).json({ error: 'Access denied. Admin only.' });
+const adminMiddleware = (req, res, next) => {
+  if (req.admin.role !== 'admin' && req.admin.role !== 'superadmin') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Access denied. Admin rights required.'
+    });
   }
   next();
 };
 
-module.exports = { auth, isAdmin };
+const superAdminMiddleware = (req, res, next) => {
+  if (req.admin.role !== 'superadmin') {
+    return res.status(403).json({
+      status: 'error',
+      message: 'Access denied. Super admin rights required.'
+    });
+  }
+  next();
+};
+
+module.exports = { authMiddleware, adminMiddleware, superAdminMiddleware };
