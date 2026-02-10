@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 const About = ({ language }) => {
   const [mounted, setMounted] = useState(false);
   const [activeValue, setActiveValue] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
@@ -25,7 +26,19 @@ const About = ({ language }) => {
     const interval = setInterval(() => {
       setActiveValue((prev) => (prev + 1) % 4);
     }, 3000);
-    return () => clearInterval(interval);
+    
+    // Check if mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   const content = {
@@ -166,48 +179,46 @@ const About = ({ language }) => {
   return (
     <div className="min-h-screen bg-white" dir={isRTL ? 'rtl' : 'ltr'}>
       
-      {/* Hero Section with White Background */}
-      <div className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-[#f8f5f0]">
-        {/* Animated Grid Pattern */}
+      {/* Hero Section */}
+      <div className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50 to-[#f8f5f0]">
+        {/* Optimized Background Pattern */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 opacity-[0.03]">
             <div className="absolute inset-0" style={{
-              backgroundImage: `linear-gradient(to right, rgba(201, 163, 62, 0.2) 1px, transparent 1px),
-                               linear-gradient(to bottom, rgba(201, 163, 62, 0.2) 1px, transparent 1px)`,
-              backgroundSize: '50px 50px',
+              backgroundImage: `linear-gradient(to right, rgba(201, 163, 62, 0.1) 1px, transparent 1px),
+                               linear-gradient(to bottom, rgba(201, 163, 62, 0.1) 1px, transparent 1px)`,
+              backgroundSize: '30px 30px',
             }} />
           </div>
           
-          {/* Floating Shapes */}
-          <div className="absolute top-20 right-20 w-64 h-64 bg-gradient-to-br from-[#c9a33e]/10 to-transparent rounded-full blur-3xl" />
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-gradient-to-tr from-[#f0e6d2]/20 to-transparent rounded-full blur-3xl" />
-          
-          {/* Subtle Particles */}
-          <div className="absolute inset-0">
-            {[...Array(10)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ y: 0, x: 0 }}
-                animate={{ 
-                  y: [0, -50, 0],
-                  x: [0, Math.sin(i) * 30, 0]
-                }}
-                transition={{
-                  duration: 8 + Math.random() * 8,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="absolute w-1 h-1 bg-[#c9a33e]/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-              />
-            ))}
-          </div>
+          {/* Reduced particle count on mobile */}
+          {!isMobile && (
+            <div className="absolute inset-0">
+              {[...Array(6)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: 0, x: 0 }}
+                  animate={{ 
+                    y: [0, -30, 0],
+                    x: [0, Math.sin(i) * 20, 0]
+                  }}
+                  transition={{
+                    duration: 8 + Math.random() * 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
+                  className="absolute w-1 h-1 bg-[#c9a33e]/20 rounded-full"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -215,42 +226,42 @@ const About = ({ language }) => {
             className="max-w-6xl mx-auto text-center"
           >
             {/* Badge */}
-            <div ref={ref} className={`inline-flex items-center gap-2 bg-gradient-to-r from-[#c9a33e]/10 to-[#f0e6d2] border border-[#c9a33e]/20 rounded-full px-6 py-3 mb-8 ${inView ? 'animate-slideInLeft' : ''}`}>
+            <div ref={ref} className={`inline-flex items-center gap-2 bg-gradient-to-r from-[#c9a33e]/10 to-[#f0e6d2] border border-[#c9a33e]/20 rounded-full px-4 py-2 md:px-6 md:py-3 mb-6 md:mb-8 ${inView ? 'animate-slideInLeft' : ''}`}>
               <div className="relative">
-                <Scale className="w-5 h-5 text-[#c9a33e]" />
-                <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-[#c9a33e]" />
+                <Scale className="w-4 h-4 md:w-5 md:h-5 text-[#c9a33e]" />
+                <Sparkles className="absolute -top-1 -right-1 w-2 h-2 md:w-3 md:h-3 text-[#c9a33e]" />
               </div>
-              <span className="text-sm font-semibold text-gray-700 tracking-wide">
+              <span className="text-xs md:text-sm font-semibold text-gray-700 tracking-wide">
                 {current.subtitle}
               </span>
-              <Star className="w-4 h-4 text-[#c9a33e]" />
+              <Star className="w-3 h-3 md:w-4 md:h-4 text-[#c9a33e]" />
             </div>
 
             {/* Title & Description */}
-            <div className="space-y-8">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            <div className="space-y-4 md:space-y-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 <span className="bg-gradient-to-r from-gray-900 via-[#c9a33e] to-gray-900 bg-clip-text text-transparent">
                   {current.title}
                 </span>
               </h1>
               
-              <p className="text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl lg:text-2xl text-gray-600 leading-relaxed max-w-3xl mx-auto px-4">
                 {current.description}
               </p>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+            {/* Stats Grid - Mobile Optimized */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-8 md:mt-12 px-4">
               {current.stats.map((stat, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="group relative overflow-hidden bg-white border border-gray-200 rounded-2xl p-6 text-center transition-all duration-500 hover:scale-105 hover:border-[#c9a33e]/40 hover:shadow-xl"
+                  className="group relative overflow-hidden bg-white border border-gray-200 rounded-xl md:rounded-2xl p-4 md:p-6 text-center transition-all duration-300 hover:border-[#c9a33e]/40 hover:shadow-lg"
                 >
                   <div className="relative z-10">
-                    <div className="text-3xl lg:text-4xl font-bold text-[#c9a33e] mb-2">
+                    <div className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#c9a33e] mb-1 md:mb-2">
                       {mounted && inView ? (
                         <CountUp
                           end={stat.number}
@@ -262,108 +273,87 @@ const About = ({ language }) => {
                         `0${stat.suffix}`
                       )}
                     </div>
-                    <div className="text-sm text-gray-600 font-medium">
+                    <div className="text-xs md:text-sm text-gray-600 font-medium leading-tight">
                       {stat.label}
                     </div>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-br from-[#c9a33e]/0 to-[#c9a33e]/0 group-hover:from-[#c9a33e]/10 group-hover:to-[#c9a33e]/5 transition-all duration-500" />
                 </motion.div>
               ))}
             </div>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - Mobile Optimized */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center mt-12"
+              className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center mt-8 md:mt-12 px-4"
             >
-              <Link to="/appointment">
+              <Link to="/appointment" className="w-full sm:w-auto">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative overflow-hidden bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full group relative overflow-hidden bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-white font-bold px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 touch-manipulation"
                 >
-                  <div className="relative z-10 flex items-center justify-center gap-3">
-                    <Calendar className="w-5 h-5" />
-                    <span className="text-lg">{current.cta}</span>
-                    <ArrowRight className={`w-5 h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
+                  <div className="relative z-10 flex items-center justify-center gap-2 md:gap-3">
+                    <Calendar className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-lg">{current.bookConsultation}</span>
+                    <ArrowRight className={`w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform ${isRTL ? 'rotate-180' : ''}`} />
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#d4b357] to-[#e0c170] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </motion.button>
               </Link>
               
-              <Link to="/contact">
+              <Link to="/contact" className="w-full sm:w-auto">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative overflow-hidden bg-white border border-gray-300 text-gray-700 font-bold px-8 py-4 rounded-xl hover:border-[#c9a33e] transition-all duration-300 hover:text-[#c9a33e] hover:shadow-lg"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="w-full group relative overflow-hidden bg-white border border-gray-300 text-gray-700 font-bold px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl hover:border-[#c9a33e] transition-all duration-300 hover:text-[#c9a33e] hover:shadow-lg touch-manipulation"
                 >
-                  <div className="relative z-10 flex items-center justify-center gap-3">
-                    <Phone className="w-5 h-5" />
-                    <span>{language === 'ar' ? 'اتصل بنا' : language === 'fr' ? 'Nous Contacter' : 'Contact Us'}</span>
+                  <div className="relative z-10 flex items-center justify-center gap-2 md:gap-3">
+                    <Phone className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base">{language === 'ar' ? 'اتصل بنا' : language === 'fr' ? 'Nous Contacter' : 'Contact Us'}</span>
                   </div>
                 </motion.button>
               </Link>
             </motion.div>
           </motion.div>
         </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-        >
-          <div className="w-6 h-10 border-2 border-[#c9a33e]/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-[#c9a33e] rounded-full mt-2" />
-          </div>
-        </motion.div>
       </div>
 
       {/* Mission & Vision */}
-      <div className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/50 to-white">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.03]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 25px 25px, #c9a33e 2px, transparent 0%)',
-            backgroundSize: '50px 50px',
-          }} />
-        </div>
-
+      <div className="relative py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/50 to-white">
         <div className="relative z-10 container mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
             <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:border-[#c9a33e]/30"
+              className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:border-[#c9a33e]/30"
             >
-              <div className="flex items-start gap-6">
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl border border-blue-200">
-                  <Target className="w-8 h-8 text-blue-600" />
+              <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+                <div className="p-3 md:p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl md:rounded-2xl border border-blue-200 shrink-0">
+                  <Target className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{current.mission}</h3>
-                  <p className="text-gray-600 leading-relaxed">{current.missionText}</p>
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">{current.mission}</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm md:text-base">{current.missionText}</p>
                 </div>
               </div>
             </motion.div>
             
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-3xl p-8 shadow-xl border border-gray-200 hover:shadow-2xl transition-all duration-300 hover:border-[#c9a33e]/30"
+              className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 hover:border-[#c9a33e]/30"
             >
-              <div className="flex items-start gap-6">
-                <div className="p-4 bg-gradient-to-br from-[#f0e6d2] to-[#c9a33e]/20 rounded-2xl border border-[#c9a33e]/30">
-                  <Award className="w-8 h-8 text-[#c9a33e]" />
+              <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
+                <div className="p-3 md:p-4 bg-gradient-to-br from-[#f0e6d2] to-[#c9a33e]/20 rounded-xl md:rounded-2xl border border-[#c9a33e]/30 shrink-0">
+                  <Award className="w-6 h-6 md:w-8 md:h-8 text-[#c9a33e]" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">{current.vision}</h3>
-                  <p className="text-gray-600 leading-relaxed">{current.visionText}</p>
+                  <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">{current.vision}</h3>
+                  <p className="text-gray-600 leading-relaxed text-sm md:text-base">{current.visionText}</p>
                 </div>
               </div>
             </motion.div>
@@ -372,25 +362,18 @@ const About = ({ language }) => {
       </div>
 
       {/* Values Section */}
-      <div className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.02]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1551135049-8a33b2c69d42?auto=format&fit=crop&w=2070&q=80")',
-          }} />
-        </div>
-
+      <div className="relative py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="relative z-10 container mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-8 md:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-6">
               {current.values}
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto px-4">
               {language === 'ar' 
                 ? 'أساس نجاحنا يعتمد على مجموعة من القيم الراسخة' 
                 : language === 'fr' 
@@ -399,7 +382,7 @@ const About = ({ language }) => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {current.valuesList.map((value, index) => (
               <motion.div
                 key={index}
@@ -407,18 +390,18 @@ const About = ({ language }) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`group relative overflow-hidden bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 ${activeValue === index ? 'ring-2 ring-[#c9a33e]' : 'hover:border-[#c9a33e]/40'}`}
-                onMouseEnter={() => setActiveValue(index)}
-                onClick={() => setActiveValue(index)}
+                className={`group relative overflow-hidden bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300 ${activeValue === index ? 'ring-1 md:ring-2 ring-[#c9a33e]' : 'hover:border-[#c9a33e]/40'}`}
+                onMouseEnter={() => !isMobile && setActiveValue(index)}
+                onClick={() => isMobile && setActiveValue(index)}
               >
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  <div className={`p-4 rounded-2xl mb-6 transition-all duration-300 ${activeValue === index ? 'bg-gradient-to-br from-[#c9a33e] to-[#d4b357]' : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-[#f0e6d2] group-hover:to-[#c9a33e]/20'}`}>
+                  <div className={`p-3 md:p-4 rounded-xl md:rounded-2xl mb-3 md:mb-6 transition-all duration-300 ${activeValue === index ? 'bg-gradient-to-br from-[#c9a33e] to-[#d4b357]' : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-[#f0e6d2] group-hover:to-[#c9a33e]/20'}`}>
                     <div className={activeValue === index ? 'text-white' : 'text-gray-600 group-hover:text-[#c9a33e]'}>
-                      {React.cloneElement(value.icon, { size: 28 })}
+                      {React.cloneElement(value.icon, { size: isMobile ? 20 : 24 })}
                     </div>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
-                  <p className="text-gray-600">{value.description}</p>
+                  <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2 md:mb-3">{value.title}</h3>
+                  <p className="text-gray-600 text-xs md:text-sm leading-relaxed">{value.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -427,26 +410,18 @@ const About = ({ language }) => {
       </div>
 
       {/* Expertise Section */}
-      <div className="relative py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.03]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `linear-gradient(45deg, transparent 48%, #c9a33e 48%, #c9a33e 52%, transparent 52%)`,
-            backgroundSize: '100px 100px',
-          }} />
-        </div>
-
+      <div className="relative py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="relative z-10 container mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-8 md:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-6">
               {current.expertise}
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto px-4">
               {language === 'ar' 
                 ? 'نغطي جميع المجالات القانونية الرئيسية' 
                 : language === 'fr' 
@@ -455,7 +430,7 @@ const About = ({ language }) => {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {current.expertiseList.map((item, index) => (
               <motion.div
                 key={index}
@@ -465,17 +440,17 @@ const About = ({ language }) => {
                 transition={{ delay: index * 0.1 }}
                 className="group"
               >
-                <Link to="/services">
-                  <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200 hover:border-[#c9a33e] group-hover:-translate-y-2">
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl group-hover:bg-gradient-to-br group-hover:from-[#f0e6d2] group-hover:to-[#c9a33e]/20 transition-all duration-300">
+                <Link to="/services" className="block">
+                  <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 hover:border-[#c9a33e] group-hover:-translate-y-1 md:group-hover:-translate-y-2">
+                    <div className="flex items-start gap-3 md:gap-4">
+                      <div className="p-2 md:p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg md:rounded-xl group-hover:bg-gradient-to-br group-hover:from-[#f0e6d2] group-hover:to-[#c9a33e]/20 transition-all duration-300 shrink-0">
                         <div className="text-gray-600 group-hover:text-[#c9a33e]">
-                          {React.cloneElement(item.icon, { size: 24 })}
+                          {React.cloneElement(item.icon, { size: isMobile ? 18 : 22 })}
                         </div>
                       </div>
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
-                        <p className="text-gray-600 text-sm">{item.desc}</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1 md:mb-2 truncate">{item.title}</h3>
+                        <p className="text-gray-600 text-xs md:text-sm line-clamp-2 md:line-clamp-3">{item.desc}</p>
                       </div>
                     </div>
                   </div>
@@ -487,30 +462,23 @@ const About = ({ language }) => {
       </div>
 
       {/* Team Section */}
-      <div className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-[0.02]">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'url("https://images.unsplash.com/photo-1551836026-d5c2ca1c4c8c?auto=format&fit=crop&w=2070&q=80")',
-          }} />
-        </div>
-
+      <div className="relative py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
         <div className="relative z-10 container mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-8 md:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 md:mb-6">
               {current.team}
             </h2>
-            <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+            <p className="text-gray-600 text-sm md:text-lg max-w-2xl mx-auto px-4">
               {current.teamDescription}
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
             {[
               { 
                 name: language === 'ar' ? 'المحامي محمد اليزيدي' : language === 'fr' ? 'Avocat Mohamed El Yazidi' : 'Lawyer Mohamed El Yazidi',
@@ -520,7 +488,7 @@ const About = ({ language }) => {
                   : language === 'fr' 
                     ? 'Expert en droit commercial international avec 15+ ans d\'expérience'
                     : 'Expert in international business law with 15+ years experience',
-                img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=500',
+                img: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=500&q=80',
               },
               { 
                 name: language === 'ar' ? 'المحامية فاطمة العلمي' : language === 'fr' ? 'Avocate Fatima El Alami' : 'Lawyer Fatima El Alami',
@@ -530,7 +498,7 @@ const About = ({ language }) => {
                   : language === 'fr' 
                     ? 'Spécialisée en propriété intellectuelle et arbitrage international'
                     : 'Specialized in intellectual property and international arbitration',
-                img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=500',
+                img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=500&q=80',
               },
               { 
                 name: language === 'ar' ? 'المحامي كريم الدريسي' : language === 'fr' ? 'Avocat Karim El Drissi' : 'Lawyer Karim El Drissi',
@@ -540,42 +508,41 @@ const About = ({ language }) => {
                   : language === 'fr' 
                     ? 'Expert en droit immobilier et fiscalité avec expérience internationale'
                     : 'Expert in real estate law and taxation with international experience',
-                img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=500',
+                img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=500&q=80',
               }
             ].map((member, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
                 className="group"
               >
-                <div className="bg-white rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 group-hover:border-[#c9a33e]">
-                  <div className="relative overflow-hidden h-64">
+                <div className="bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 group-hover:border-[#c9a33e] h-full flex flex-col">
+                  <div className="relative overflow-hidden h-48 md:h-56">
                     <img 
                       src={member.img} 
                       alt={member.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
-                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-[#c9a33e]/10 to-[#f0e6d2] text-[#c9a33e] text-sm font-semibold mb-4 border border-[#c9a33e]/20">
+                  <div className="p-4 md:p-6 flex-1 flex flex-col">
+                    <h3 className="text-lg md:text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                    <div className="inline-flex items-center px-2 py-1 md:px-3 md:py-1 rounded-full bg-gradient-to-r from-[#c9a33e]/10 to-[#f0e6d2] text-[#c9a33e] text-xs md:text-sm font-semibold mb-3 md:mb-4 border border-[#c9a33e]/20 self-start">
                       {member.role}
                     </div>
-                    <p className="text-gray-600 mb-6">{member.description}</p>
-                    <div className="flex gap-3">
-                      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
-                        <Linkedin className="w-4 h-4 text-gray-600 hover:text-[#c9a33e]" />
+                    <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6 flex-1">{member.description}</p>
+                    <div className="flex gap-2 md:gap-3">
+                      <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
+                        <Linkedin className="w-3 h-3 md:w-4 md:h-4 text-gray-600 hover:text-[#c9a33e]" />
                       </a>
-                      <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
-                        <Twitter className="w-4 h-4 text-gray-600 hover:text-[#c9a33e]" />
+                      <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
+                        <Twitter className="w-3 h-3 md:w-4 md:h-4 text-gray-600 hover:text-[#c9a33e]" />
                       </a>
-                      <a href="mailto:contact@legalfirm.ma" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
-                        <Mail className="w-4 h-4 text-gray-600 hover:text-[#c9a33e]" />
+                      <a href="mailto:contact@legalfirm.ma" className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-[#f0e6d2] transition-colors cursor-pointer border border-gray-200 hover:border-[#c9a33e]">
+                        <Mail className="w-3 h-3 md:w-4 md:h-4 text-gray-600 hover:text-[#c9a33e]" />
                       </a>
                     </div>
                   </div>
@@ -587,31 +554,19 @@ const About = ({ language }) => {
       </div>
 
       {/* CTA Section */}
-      <div className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-white via-gray-50 to-[#f8f5f0]">
-        {/* Background Pattern */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 opacity-[0.03]">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, #c9a33e 2px, transparent 0%)',
-              backgroundSize: '40px 40px',
-            }} />
-          </div>
-          <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-[#c9a33e]/10 to-transparent rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-[#f0e6d2]/20 to-transparent rounded-full blur-3xl" />
-        </div>
-
+      <div className="relative py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white via-gray-50 to-[#f8f5f0]">
         <div className="relative z-10 container mx-auto">
-          <div className="max-w-4xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto">
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="bg-white rounded-3xl p-8 md:p-12 shadow-2xl border border-gray-200"
+              className="bg-white rounded-xl md:rounded-2xl p-6 md:p-8 lg:p-12 shadow-xl border border-gray-200"
             >
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6 text-center">
                 {current.cta}
               </h2>
-              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              <p className="text-base md:text-xl text-gray-600 mb-6 md:mb-8 max-w-2xl mx-auto text-center">
                 {language === 'ar' 
                   ? 'تواصل معنا اليوم للحصول على استشارة مجانية' 
                   : language === 'fr' 
@@ -619,48 +574,48 @@ const About = ({ language }) => {
                     : 'Contact us today for a free consultation'}
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center">
                 <Link to="/appointment" className="w-full sm:w-auto">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-full bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-white font-bold px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 md:gap-3 touch-manipulation"
                   >
-                    <Calendar className="w-5 h-5" />
-                    <span>{current.bookConsultation}</span>
-                    <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+                    <Calendar className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base">{current.bookConsultation}</span>
+                    <ArrowRight className={`w-4 h-4 md:w-5 md:h-5 ${isRTL ? 'rotate-180' : ''}`} />
                   </motion.button>
                 </Link>
                 
                 <Link to="/contact" className="w-full sm:w-auto">
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="w-full bg-white border border-gray-300 text-gray-700 font-bold px-8 py-4 rounded-xl hover:border-[#c9a33e] hover:text-[#c9a33e] transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-3"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-white border border-gray-300 text-gray-700 font-bold px-6 md:px-8 py-3 md:py-4 rounded-lg md:rounded-xl hover:border-[#c9a33e] hover:text-[#c9a33e] transition-all duration-300 hover:shadow-lg flex items-center justify-center gap-2 md:gap-3 touch-manipulation"
                   >
-                    <Phone className="w-5 h-5" />
-                    <span>{language === 'ar' ? 'اتصل بنا' : language === 'fr' ? 'Nous Appeler' : 'Call Us'}</span>
+                    <Phone className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="text-sm md:text-base">{language === 'ar' ? 'اتصل بنا' : language === 'fr' ? 'Nous Appeler' : 'Call Us'}</span>
                   </motion.button>
                 </Link>
               </div>
               
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <div className="flex flex-wrap justify-center items-center gap-6 text-gray-600">
+              <div className="mt-6 md:mt-8 pt-6 md:pt-8 border-t border-gray-200">
+                <div className="flex flex-col md:flex-row flex-wrap justify-center items-center gap-4 md:gap-6 text-gray-600">
                   <div className="flex items-center gap-2">
-                    <Mail className="w-5 h-5 text-[#c9a33e]" />
-                    <a href={`mailto:${current.email}`} className="hover:text-[#c9a33e] transition-colors">
+                    <Mail className="w-4 h-4 md:w-5 md:h-5 text-[#c9a33e]" />
+                    <a href={`mailto:${current.email}`} className="text-sm md:text-base hover:text-[#c9a33e] transition-colors">
                       {current.email}
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Phone className="w-5 h-5 text-[#c9a33e]" />
-                    <a href={`tel:${current.phone.replace(/\s/g, '')}`} className="hover:text-[#c9a33e] transition-colors">
+                    <Phone className="w-4 h-4 md:w-5 md:h-5 text-[#c9a33e]" />
+                    <a href={`tel:${current.phone.replace(/\s/g, '')}`} className="text-sm md:text-base hover:text-[#c9a33e] transition-colors">
                       {current.phone}
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-[#c9a33e]" />
-                    <span>{current.address.split(',')[0]}</span>
+                    <MapPin className="w-4 h-4 md:w-5 md:h-5 text-[#c9a33e]" />
+                    <span className="text-sm md:text-base">{current.address.split(',')[0]}</span>
                   </div>
                 </div>
               </div>

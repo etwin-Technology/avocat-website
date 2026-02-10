@@ -1,106 +1,101 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
-  // Health check
+  /* =========================
+     🩺 HEALTH
+  ========================== */
   static async checkHealth() {
     const response = await fetch(`${API_BASE_URL}/health`);
+
     if (!response.ok) {
       throw new Error(`Server health check failed: ${response.status}`);
     }
+
     return response.json();
   }
 
-  // Create appointment
-  static async createAppointment(appointmentData) {
-    const response = await fetch(`${API_BASE_URL}/appointments`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(appointmentData)
-    });
+  /* =========================
+     📅 APPOINTMENTS
+  ========================== */
 
-    const data = await response.json();
-    
+  // Create appointment (Public)
+  static async createAppointment(appointmentData) {
+    return this._post('/appointments', appointmentData);
+  }
+
+  // Get availability slots
+  static async getAvailability(date) {
+    const formattedDate = new Date(date).toISOString().split('T')[0];
+    return this._get(
+      `/appointments/availability/slots?date=${formattedDate}`
+    );
+  }
+
+  // Get appointment by reference number
+  static async getAppointment(referenceNumber) {
+    return this._get(`/appointments/${referenceNumber}`);
+  }
+
+  /* =========================
+     📧 CONTACTS
+  ========================== */
+
+  // Submit contact form (PUBLIC)
+  static async submitContact(formData) {
+    return this._post('/contacts', formData);
+  }
+
+  // (Optional) Admin – get all contacts
+  static async getContacts(query = '') {
+    return this._get(`/contacts${query}`);
+  }
+
+  // (Optional) Admin – get single contact
+  static async getContactById(id) {
+    return this._get(`/contacts/${id}`);
+  }
+
+  /* =========================
+     🧠 INTERNAL HELPERS
+  ========================== */
+
+  static async _get(endpoint) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
+
+    const data = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-      const errorMessage = data.message || 
-                          (data.errors && data.errors.join(', ')) || 
-                          `Server error: ${response.status}`;
-      throw new Error(errorMessage);
+      throw new Error(
+        data.message ||
+          (data.errors && data.errors.join(', ')) ||
+          `Server error: ${response.status}`
+      );
     }
 
     return data;
   }
 
-  // Get availability
-  static async getAvailability(date) {
-    // Format date as YYYY-MM-DD
-    const dateObj = new Date(date);
-    const formattedDate = dateObj.toISOString().split('T')[0];
-    
-    const response = await fetch(`${API_BASE_URL}/appointments/availability/slots?date=${formattedDate}`);
-    
+  static async _post(endpoint, body) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-      throw new Error(`Failed to fetch availability: ${response.status}`);
+      throw new Error(
+        data.message ||
+          (data.errors && data.errors.join(', ')) ||
+          `Server error: ${response.status}`
+      );
     }
-    
-    return response.json();
-  }
 
-  // Get appointment by reference
-  static async getAppointment(referenceNumber) {
-    const response = await fetch(`${API_BASE_URL}/appointments/${referenceNumber}`);
-    
-    if (!response.ok) {
-      throw new Error(`Failed to fetch appointment: ${response.status}`);
-    }
-    
-    return response.json();
-  }
-
-  // Submit contact form - UPDATED
-  static async submitContact(formData) {
-    console.log('📧 Sending contact data:', formData);
-    
-    try {
-      const response = await fetch(`${API_BASE_URL}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await response.json();
-      
-      console.log('📧 Contact response:', {
-        status: response.status,
-        ok: response.ok,
-        data: data
-      });
-      
-      if (!response.ok) {
-        const errorMessage = data.message || 
-                            (data.errors && data.errors.join(', ')) || 
-                            `Server error: ${response.status}`;
-        throw new Error(errorMessage);
-      }
-
-      return data;
-      
-    } catch (error) {
-      console.error('❌ Contact API error:', error);
-      throw error;
-    }
-  }
-
-  // Test contact endpoint
-  static async testContactEndpoint() {
-    const response = await fetch(`${API_BASE_URL}/contact/debug`);
-    if (!response.ok) {
-      throw new Error(`Contact endpoint test failed: ${response.status}`);
-    }
-    return response.json();
+    return data;
   }
 }
 

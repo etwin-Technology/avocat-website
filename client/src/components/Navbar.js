@@ -30,7 +30,8 @@ import {
   CheckCircle,
   Info,
   BookOpen,
-  HelpCircle
+  HelpCircle,
+  ChevronLeft
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -41,6 +42,7 @@ const Navbar = ({ language, onLanguageChange }) => {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [mobileDropdown, setMobileDropdown] = useState(null);
   const [isLanguageOpen, setIsLanguageOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
   const isRTL = language === 'ar';
   
@@ -81,7 +83,7 @@ const Navbar = ({ language, onLanguageChange }) => {
     },
     { 
       name: { ar: 'خدماتنا', fr: 'Services', en: 'Services' }, 
-      href: '#services', // تغيير إلى رابط قسم في نفس الصفحة
+      href: '#services',
       icon: <Scale size={18} />,
       dropdown: {
         ar: [
@@ -148,27 +150,39 @@ const Navbar = ({ language, onLanguageChange }) => {
     { code: 'en', name: 'English', short: 'EN', direction: 'ltr' }
   ];
 
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Set document direction when language changes
   useEffect(() => {
     document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
   }, [language, isRTL]);
 
+  // Handle scroll effect
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Close language dropdown
       if (languageRef.current && !languageRef.current.contains(event.target)) {
         setIsLanguageOpen(false);
       }
-      // Close desktop dropdowns
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setActiveDropdown(null);
       }
@@ -183,6 +197,7 @@ const Navbar = ({ language, onLanguageChange }) => {
     };
   }, []);
 
+  // Handle body overflow when mobile menu is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -195,13 +210,17 @@ const Navbar = ({ language, onLanguageChange }) => {
   }, [isOpen]);
 
   const handleDropdownEnter = (index) => {
-    setActiveDropdown(index);
+    if (!isMobile) {
+      setActiveDropdown(index);
+    }
   };
 
   const handleDropdownLeave = () => {
-    setTimeout(() => {
-      setActiveDropdown(null);
-    }, 200);
+    if (!isMobile) {
+      setTimeout(() => {
+        setActiveDropdown(null);
+      }, 200);
+    }
   };
 
   const toggleMobileDropdown = (index) => {
@@ -222,22 +241,17 @@ const Navbar = ({ language, onLanguageChange }) => {
   };
 
   const handleHashLinkClick = (href) => {
-    // إذا كان الرابط يبدأ بـ # فهذا يعني رابط قسم في نفس الصفحة
     if (href.startsWith('#')) {
-      // إذا كنا في الصفحة الرئيسية
       if (location.pathname === '/') {
         const element = document.querySelector(href);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
+          setIsOpen(false);
         }
       } else {
-        // إذا كنا في صفحة أخرى، نذهب إلى الصفحة الرئيسية ثم ننتقل إلى القسم
         window.location.href = `/${href}`;
       }
     }
-    setIsOpen(false);
-    setActiveDropdown(null);
-    setMobileDropdown(null);
   };
 
   const closeAllDropdowns = () => {
@@ -253,7 +267,7 @@ const Navbar = ({ language, onLanguageChange }) => {
       {/* Top Announcement Bar */}
       <div className={`bg-gradient-to-r from-[#c9a33e] via-[#d4b357] to-[#c9a33e] text-gray-900 py-2 transition-all duration-300 ${isScrolled ? 'opacity-90' : 'opacity-100'} hidden sm:block`}>
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-center gap-3 text-sm font-medium" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className={`flex items-center justify-center gap-3 text-sm font-medium`} dir={isRTL ? 'rtl' : 'ltr'}>
             <Sparkles className="w-4 h-4 animate-pulse" />
             <span className="text-center">
               {language === 'ar' 
@@ -268,12 +282,12 @@ const Navbar = ({ language, onLanguageChange }) => {
       </div>
 
       {/* Top Info Bar */}
-      <div className={`bg-[#1a365d] text-white py-3 transition-all duration-500 ${isScrolled ? 'py-2 opacity-90' : ''}`}>
+      <div className={`bg-[#1a365d] text-white py-3 transition-all duration-500 ${isScrolled ? 'py-2' : ''}`}>
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
             {/* Contact Info */}
-            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm" dir={isRTL ? 'rtl' : 'ltr'}>
-              <a href="tel:+2126XXXXXXX" className="flex items-center gap-2 hover:text-[#c9a33e] transition-colors group">
+            <div className={`flex flex-wrap justify-center gap-4 sm:gap-6 text-sm`} dir={isRTL ? 'rtl' : 'ltr'}>
+              <a href="tel:+2126XXXXXXX" className="flex items-center gap-2 hover:text-[#c9a33e] transition-colors group touch-manipulation">
                 <div className="relative">
                   <Phone size={16} />
                   <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
@@ -295,11 +309,11 @@ const Navbar = ({ language, onLanguageChange }) => {
             </div>
 
             {/* Language & Actions */}
-            <div className="flex items-center gap-3 sm:gap-4" dir={isRTL ? 'rtl' : 'ltr'}>
+            <div className={`flex items-center gap-3 sm:gap-4`} dir={isRTL ? 'rtl' : 'ltr'}>
               {/* Language Selector */}
               <div className="relative" ref={languageRef}>
                 <button 
-                  className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all min-w-[80px] justify-center"
+                  className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-lg hover:bg-white/20 transition-all min-w-[80px] justify-center touch-manipulation"
                   onClick={() => setIsLanguageOpen(!isLanguageOpen)}
                 >
                   <Globe size={16} />
@@ -323,7 +337,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                       <button
                         key={lang.code}
                         onClick={() => handleLanguageChange(lang.code)}
-                        className={`flex items-center justify-between w-full px-4 py-3 hover:bg-gray-50 transition-all ${language === lang.code ? 'bg-[#1a365d]/5' : ''}`}
+                        className={`flex items-center justify-between w-full px-4 py-3 hover:bg-gray-50 transition-all touch-manipulation ${language === lang.code ? 'bg-[#1a365d]/5' : ''}`}
                         dir={lang.direction}
                       >
                         <div className="flex items-center gap-3">
@@ -346,7 +360,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                 href="https://wa.me/2126XXXXXXX"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden lg:flex items-center gap-2 px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg transition-all"
+                className="hidden lg:flex items-center gap-2 px-3 py-1 bg-green-600 hover:bg-green-700 rounded-lg transition-all touch-manipulation"
               >
                 <MessageCircle size={16} />
                 <span className="text-sm font-medium">WhatsApp</span>
@@ -357,18 +371,22 @@ const Navbar = ({ language, onLanguageChange }) => {
       </div>
 
       {/* Main Navbar */}
-      <nav className={`sticky top-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-white/95 backdrop-blur-lg shadow-xl' : 'bg-white'}`} ref={dropdownRef}>
+      <nav 
+        className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/95 backdrop-blur-lg shadow-lg' : 'bg-white shadow-sm'}`} 
+        ref={dropdownRef}
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center h-16 sm:h-20">
-            {/* Logo - Responsive */}
+            {/* Logo */}
             <Link 
               to="/" 
               className="flex items-center gap-2 sm:gap-3 group flex-shrink-0"
               onClick={closeAllDropdowns}
             >
               <div className="relative">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#1a365d] to-[#2d4a8a] rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="w-5 h-5 sm:w-7 sm:h-7 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#1a365d] to-[#2d4a8a] rounded-lg sm:rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+                  <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
                 <Star className="absolute -top-1 -right-1 w-3 h-3 sm:w-4 sm:h-4 text-[#c9a33e] animate-pulse" />
               </div>
@@ -410,7 +428,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                   {item.href.startsWith('#') ? (
                     <button
                       onClick={() => handleHashLinkClick(item.href)}
-                      className={`flex items-center gap-2 px-3 xl:px-4 py-2 rounded-lg transition-all duration-300 ${
+                      className={`flex items-center gap-2 px-3 xl:px-4 py-2 rounded-lg transition-all duration-300 touch-manipulation ${
                         location.pathname === '/' && location.hash === item.href
                           ? 'bg-gradient-to-r from-[#1a365d]/10 to-[#c9a33e]/10 text-[#1a365d] font-semibold'
                           : 'text-gray-700 hover:text-[#1a365d] hover:bg-gray-100'
@@ -469,7 +487,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                         <button
                           key={subIndex}
                           onClick={() => handleHashLinkClick(subItem.href)}
-                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-all group w-full text-left"
+                          className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-all group w-full text-left touch-manipulation"
                           dir={isRTL ? 'rtl' : 'ltr'}
                         >
                           <div className="text-[#c9a33e]">
@@ -480,7 +498,11 @@ const Navbar = ({ language, onLanguageChange }) => {
                               {subItem.name}
                             </div>
                           </div>
-                          <ChevronRight className={`w-4 h-4 text-gray-400 group-hover:text-[#c9a33e] ${isRTL ? 'rotate-180' : ''}`} />
+                          {isRTL ? (
+                            <ChevronLeft className="w-4 h-4 text-gray-400 group-hover:text-[#c9a33e]" />
+                          ) : (
+                            <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-[#c9a33e]" />
+                          )}
                         </button>
                       ))}
                     </div>
@@ -494,7 +516,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                   setIsSearchOpen(!isSearchOpen);
                   closeAllDropdowns();
                 }}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-all ml-2"
+                className="p-2 rounded-lg hover:bg-gray-100 transition-all ml-2 touch-manipulation"
               >
                 <Search size={20} className="text-gray-600" />
               </button>
@@ -503,11 +525,11 @@ const Navbar = ({ language, onLanguageChange }) => {
               <Link
                 to="/appointment"
                 onClick={closeAllDropdowns}
-                className="flex items-center gap-2 ml-2 px-4 xl:px-6 py-2 xl:py-3 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 font-bold rounded-lg hover:shadow-xl hover:shadow-[#c9a33e]/30 hover:scale-105 transition-all duration-300 whitespace-nowrap"
+                className="flex items-center gap-2 ml-2 px-4 xl:px-6 py-2 xl:py-3 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 font-bold rounded-lg hover:shadow-xl hover:shadow-[#c9a33e]/30 hover:scale-105 transition-all duration-300 whitespace-nowrap touch-manipulation"
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
                 <Calendar size={16} className="hidden xl:block" />
-                <span>{language === 'ar' ? 'حجز موعد' : language === 'fr' ? 'Rendez-vous' : 'Book Now'}</span>
+                <span className="text-sm xl:text-base">{language === 'ar' ? 'حجز موعد' : language === 'fr' ? 'Rendez-vous' : 'Book Now'}</span>
               </Link>
             </div>
 
@@ -518,7 +540,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                   setIsSearchOpen(!isSearchOpen);
                   closeAllDropdowns();
                 }}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-all"
+                className="p-2 rounded-lg hover:bg-gray-100 transition-all touch-manipulation"
               >
                 <Search size={20} className="text-gray-600" />
               </button>
@@ -527,7 +549,7 @@ const Navbar = ({ language, onLanguageChange }) => {
               <Link
                 to="/appointment"
                 onClick={closeAllDropdowns}
-                className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300"
+                className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 font-bold rounded-lg hover:shadow-lg transition-all duration-300 touch-manipulation"
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
                 <Calendar size={16} />
@@ -536,7 +558,8 @@ const Navbar = ({ language, onLanguageChange }) => {
               
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="p-2 rounded-lg hover:bg-gray-100 transition-all"
+                className="p-2 rounded-lg hover:bg-gray-100 transition-all touch-manipulation"
+                aria-label={isOpen ? 'Close menu' : 'Open menu'}
               >
                 {isOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
@@ -546,7 +569,7 @@ const Navbar = ({ language, onLanguageChange }) => {
 
         {/* Search Bar */}
         {isSearchOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white shadow-lg py-4 px-4 border-t z-[100] animate-slideDown">
+          <div className="absolute top-full left-0 right-0 bg-white shadow-lg py-4 px-4 border-t z-[100] animate-slideDown" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className="container mx-auto">
               <div className="relative">
                 <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 ${isRTL ? 'right-4' : 'left-4'}`} size={20} />
@@ -557,7 +580,18 @@ const Navbar = ({ language, onLanguageChange }) => {
                   dir={isRTL ? 'rtl' : 'ltr'}
                   autoFocus
                   onBlur={() => setIsSearchOpen(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setIsSearchOpen(false);
+                    }
+                  }}
                 />
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 ${isRTL ? 'left-4' : 'right-4'}`}
+                >
+                  <X size={20} />
+                </button>
               </div>
             </div>
           </div>
@@ -576,19 +610,17 @@ const Navbar = ({ language, onLanguageChange }) => {
           {/* Mobile Menu Panel */}
           <div 
             ref={mobileMenuRef}
-            className={`absolute top-0 h-full bg-white w-full sm:w-80 shadow-2xl ${
-              isRTL ? 'right-0' : 'left-0'
-            }`}
+            className={`absolute top-0 h-full bg-white w-full sm:w-80 shadow-2xl animate-slideIn ${isRTL ? 'right-0' : 'left-0'}`}
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {/* Mobile Header */}
             <div className="p-4 sm:p-6 border-b">
-              <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div className="flex items-center gap-3">
+              <div className={`flex items-center ${isRTL ? 'flex-row-reverse justify-between' : 'justify-between'} mb-4 sm:mb-6`}>
+                <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-[#1a365d] to-[#2d4a8a] rounded-lg flex items-center justify-center">
                     <Shield className="w-6 h-6 text-white" />
                   </div>
-                  <div>
+                  <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
                     <div className="font-bold text-[#1a365d]">
                       {language === 'ar' ? 'المحامي' : language === 'fr' ? 'Avocat' : 'Lawyer'}
                     </div>
@@ -599,7 +631,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                 </div>
                 <button 
                   onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-all"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-all touch-manipulation"
                 >
                   <X size={24} className="text-gray-500" />
                 </button>
@@ -609,7 +641,7 @@ const Navbar = ({ language, onLanguageChange }) => {
               <div className="grid grid-cols-2 gap-3 mb-4 sm:mb-6">
                 <a 
                   href="tel:+2126XXXXXXX"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#1a365d] to-[#2d4a8a] text-white rounded-lg hover:opacity-90 transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#1a365d] to-[#2d4a8a] text-white rounded-lg hover:opacity-90 transition-all touch-manipulation"
                   onClick={() => setIsOpen(false)}
                 >
                   <Phone size={18} />
@@ -617,7 +649,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                 </a>
                 <Link
                   to="/appointment"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 rounded-lg hover:opacity-90 transition-all"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-[#c9a33e] to-[#d4b357] text-gray-900 rounded-lg hover:opacity-90 transition-all touch-manipulation"
                   onClick={() => setIsOpen(false)}
                 >
                   <Calendar size={18} />
@@ -630,7 +662,7 @@ const Navbar = ({ language, onLanguageChange }) => {
             <div className="p-4 overflow-y-auto h-[calc(100vh-200px)]">
               {navItems.map((item, index) => (
                 <div key={index} className="mb-1">
-                  <div className="flex items-center">
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {item.href.startsWith('#') ? (
                       <button
                         onClick={() => {
@@ -640,7 +672,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                             setMobileDropdown(null);
                           }
                         }}
-                        className={`flex items-center gap-3 flex-1 p-4 rounded-lg transition-all ${
+                        className={`flex items-center gap-3 flex-1 p-4 rounded-lg transition-all touch-manipulation ${isRTL ? 'flex-row-reverse' : ''} ${
                           location.pathname === '/' && location.hash === item.href
                             ? 'bg-gradient-to-r from-[#1a365d]/10 to-[#c9a33e]/10 text-[#1a365d] font-semibold'
                             : 'hover:bg-gray-100'
@@ -649,12 +681,12 @@ const Navbar = ({ language, onLanguageChange }) => {
                         <div className="text-gray-600">
                           {item.icon}
                         </div>
-                        <span className="font-medium">{item.name[language]}</span>
+                        <span className="font-medium flex-1">{item.name[language]}</span>
                       </button>
                     ) : (
                       <Link
                         to={item.href}
-                        className={`flex items-center gap-3 flex-1 p-4 rounded-lg transition-all ${
+                        className={`flex items-center gap-3 flex-1 p-4 rounded-lg transition-all ${isRTL ? 'flex-row-reverse' : ''} ${
                           location.pathname === item.href 
                             ? 'bg-gradient-to-r from-[#1a365d]/10 to-[#c9a33e]/10 text-[#1a365d] font-semibold'
                             : 'hover:bg-gray-100'
@@ -669,14 +701,14 @@ const Navbar = ({ language, onLanguageChange }) => {
                         <div className="text-gray-600">
                           {item.icon}
                         </div>
-                        <span className="font-medium">{item.name[language]}</span>
+                        <span className="font-medium flex-1">{item.name[language]}</span>
                       </Link>
                     )}
                     
                     {item.dropdown && (
                       <button
                         onClick={() => toggleMobileDropdown(index)}
-                        className="p-4 hover:bg-gray-100 rounded-lg transition-all"
+                        className="p-4 hover:bg-gray-100 rounded-lg transition-all touch-manipulation"
                       >
                         <ChevronDown size={16} className={`transition-transform ${mobileDropdown === index ? 'rotate-180' : ''}`} />
                       </button>
@@ -685,17 +717,17 @@ const Navbar = ({ language, onLanguageChange }) => {
                   
                   {/* Mobile Dropdown */}
                   {item.dropdown && mobileDropdown === index && (
-                    <div className="ml-10 mt-1 space-y-1">
+                    <div className={`${isRTL ? 'mr-10 ml-4' : 'ml-10 mr-4'} mt-1 space-y-1`}>
                       {item.dropdown[language].map((subItem, subIndex) => (
                         <button
                           key={subIndex}
                           onClick={() => handleHashLinkClick(subItem.href)}
-                          className="flex items-center gap-3 p-3 pl-4 rounded-lg hover:bg-gray-50 transition-all w-full text-left"
+                          className={`flex items-center gap-3 p-3 ${isRTL ? 'pr-4 pl-3 flex-row-reverse' : 'pl-4 pr-3'} rounded-lg hover:bg-gray-50 transition-all w-full text-left touch-manipulation`}
                         >
                           <div className="text-[#c9a33e]">
                             {subItem.icon}
                           </div>
-                          <span className="text-gray-700">{subItem.name}</span>
+                          <span className="text-gray-700 flex-1">{subItem.name}</span>
                         </button>
                       ))}
                     </div>
@@ -715,7 +747,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 rounded-lg transition-all touch-manipulation ${
                         language === lang.code 
                           ? 'bg-[#1a365d] text-white' 
                           : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-300'
@@ -733,7 +765,7 @@ const Navbar = ({ language, onLanguageChange }) => {
                 href="https://wa.me/2126XXXXXXX"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full p-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all mb-4"
+                className="flex items-center justify-center gap-2 w-full p-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all mb-4 touch-manipulation"
                 onClick={() => setIsOpen(false)}
               >
                 <MessageCircle size={18} />
